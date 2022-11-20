@@ -2,18 +2,28 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
+
+	"./blockchain"
 )
 
-const port string = ":4000"
+const PORT string = ":4000"
+
+type HomeData struct {
+	PageTitle string
+	Blocks []*blockchain.Block
+}
 
 func home(rw http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(rw, "Hello, It's Home!")
+	templ := template.Must(template.ParseFiles("template/index.html"))
+	data := HomeData("Home", blockchain.getBlockchain().AllBlocks())
+	templ.Execute(rw, data)
 }
 
 func main() {
 	http.HandleFunc("/", home)
-	fmt.Printf("Listening on http://localhost%s\n", port)
-	log.Fatal(http.ListenAndServe(port, nil))
+	fmt.Printf("Listening on http://localhost%s\n", PORT)
+	log.Fatal(http.ListenAndServe(PORT, nil))
 }

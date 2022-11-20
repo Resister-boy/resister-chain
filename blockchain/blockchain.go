@@ -1,41 +1,38 @@
 package blockchain
 
 import (
-	"sync",
+	"crypto/sha256"
 	"fmt"
+	"sync"
 )
 
-type block struct { // Block Components
-	Data string
+type Block struct {
 	Hash string
+	Data string
 	PrevHash string
 }
 
 type blockchain struct {
-	blocks []*block
+	blocks []*Block
 }
 
-var b *blockchain
-var once sync.Once
-
-func (b *block) createHash() {
-	hash := sha256.Sum256([]byte(b.Data + b.PrevHash)) // Current Block Hash Generate
+func (b *Block) createHash() {
+	hash := sha256.Sum256([]byte(b.Data + b.PrevHash))
 	b.Hash = fmt.Sprintf("%x", hash)
 }
 
-func getLastHash() string { // return Lash Block Hash
+func getLastHash() string {
 	totalBlocks := len(getBlockchain().blocks)
 	if (totalBlocks == 0) {
-		return "" // if Genesis Block return null
+		return ""
 	}
 	return getBlockchain().blocks[totalBlocks - 1].Hash
-	// ifn Genesis Block return Previous Block Hash
 }
 
-func createBlock(data string) *block {
-	newBlock := block(data, "", getLastHash)
-	newBlock.createHash() // Create Hash Func
-	return newBlock
+func createBlock(data string) *Block {
+	newBlock := Block(data, "", getLastHash())
+	newBlock.createHash()
+	return &newBlock
 }
 
 func (b *blockchain) AddBlock(data string) {
@@ -43,7 +40,7 @@ func (b *blockchain) AddBlock(data string) {
 }
 
 func getBlockchain() *blockchain {
-	if b == nil { // if문은 한 번만 실행, 한 번 실행되면 b는 nil이 될 수 없기 때문
+	if b == nil {
 		once.Do(func() {
 			b = &blockchain{}
 			b.AddBlock("Genesis")
@@ -52,6 +49,6 @@ func getBlockchain() *blockchain {
 	return b
 }
 
-func (b *blockchain) AllBlocks() {}*block {
-	return b.block
+func (b *blockchain) AllBlocks() []*Block {
+	return b.blocks
 }
